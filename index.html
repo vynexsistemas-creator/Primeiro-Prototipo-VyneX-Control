@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VyneX Control</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="brand">
+            <img src="logo.png" alt="VyneX Logo" class="brand-logo">
+            <div class="brand-text">
+                <h1>VyneX</h1>
+                <span>Control</span>
+            </div>
+        </div>
+        <nav class="menu">
+            <a href="#" class="menu-item active" onclick="showScreen('dashboard', this)">
+                <i class="fa-solid fa-chart-pie"></i><span>Dashboard</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showScreen('obras', this)">
+                <i class="fa-solid fa-helmet-safety"></i><span>Obras</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showScreen('responsaveis', this)">
+                <i class="fa-solid fa-users"></i><span>Responsáveis</span>
+            </a>
+        </nav>
+        <div class="user-profile">
+            <div class="avatar">AD</div>
+            <div class="user-info">
+                <strong>Admin</strong>
+                <small>Gerente de Obras</small>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        
+        <header class="top-header">
+            <h2 id="page-title">Painel de Controle</h2>
+            <button class="btn-primary" onclick="openModal('modal-obra')">
+                <i class="fa-solid fa-plus"></i> Nova Obra
+            </button>
+        </header>
+
+        <!-- TELA: DASHBOARD -->
+        <section id="screen-dashboard" class="screen active">
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="icon-box blue"><i class="fa-solid fa-building"></i></div>
+                    <div class="stat-info"><h3 id="count-obras">0</h3><span>Obras Ativas</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box green"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-info"><h3 id="count-resp">0</h3><span>Responsáveis</span></div>
+                </div>
+            </div>
+            <div class="projects-section">
+                <h3>Progresso das Obras</h3>
+                <div id="lista-obras-dash"></div>
+            </div>
+        </section>
+
+        <!-- TELA: OBRAS -->
+        <section id="screen-obras" class="screen">
+            <div class="projects-section">
+                <h3>Todas as Obras</h3>
+                <div id="lista-obras-full"></div>
+            </div>
+        </section>
+
+        <!-- TELA: RESPONSÁVEIS -->
+        <section id="screen-responsaveis" class="screen">
+            <div class="cadastro-section">
+                <h3>Cadastro de Responsável</h3>
+                <form id="form-resp" class="form-grid">
+                    <div class="form-group">
+                        <label>Nome Completo</label>
+                        <input type="text" id="resp-nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Cargo</label>
+                        <select id="resp-cargo">
+                            <option value="Engenheiro">Engenheiro</option>
+                            <option value="Arquiteto">Arquiteto</option>
+                            <option value="Mestre de Obras">Mestre de Obras
+                            </option>
+                            <option value="Tec em Edificações">Tec em Edificações 
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <button type="submit" class="btn-primary">Salvar Responsável</button>
+                    </div>
+                </form>
+                <h3>Equipe</h3>
+                <div id="lista-resp"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: NOVA OBRA -->
+    <div id="modal-obra" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nova Obra</h3>
+                <button class="btn-close" onclick="closeModal('modal-obra')">&times;</button>
+            </div>
+            <form id="form-obra">
+                <div class="form-group">
+                    <label>Nome da Obra</label>
+                    <input type="text" id="obra-nome" required>
+                </div>
+                <div class="form-group">
+                    <label>Responsáveis (Segure Ctrl para selecionar mais de um)</label>
+                    <div id="lista-resp-check" class="checkbox-list"></div>
+                </div>
+                <div class="form-group full-width">
+                    <button type="submit" class="btn-primary">Criar Obra</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: DETALHES DA OBRA (FOTOS E CHECKLIST) -->
+    <div id="modal-detalhes" class="modal-overlay">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="detalhes-titulo">Detalhes</h3>
+                <button class="btn-close" onclick="closeModal('modal-detalhes')">&times;</button>
+            </div>
+            <div id="detalhes-conteudo">
+                <!-- Conteúdo gerado via JS -->
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
