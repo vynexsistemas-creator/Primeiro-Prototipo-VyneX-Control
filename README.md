@@ -1,6 +1,3 @@
-<div align="center">
-
-<img src="logo.jpg" alt="Logo IN LOCO Construtora" width="100">
 
 # 🏗️ Sistema Inteligente de Inspeção e Conferência de Serviços
 
