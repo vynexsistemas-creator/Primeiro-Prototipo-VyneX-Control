@@ -253,3 +253,11 @@ input:focus, select:focus { outline: none; border-color: var(--primary); }
     .project-header { flex-direction: column; align-items: flex-start; gap: 10px; }
     .project-header .btn-primary { width: 100%; justify-content: center; }
 }
+
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+}

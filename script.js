@@ -1,5 +1,6 @@
 // BANCO DE DADOS LOCAL
-let db = {
+(function (){
+    let db = {
     obras: JSON.parse(localStorage.getItem('vynex_obras')) || [],
     responsaveis: JSON.parse(localStorage.getItem('vynex_resp')) || []
 };
@@ -25,7 +26,7 @@ function showScreen(screenId) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     
     // Encontra o item clicado (seveve pelo onclick no HTML)
-    const clickedItem = document.querySelector(`[onclick="showScreen('${screenId}')"]`);
+    const clickedItem = document.querySelector(`[data-screen="${screenId}"]`);
     if(clickedItem) clickedItem.classList.add('active');
 }
 
@@ -118,7 +119,7 @@ function renderAll() {
                     <h4>${o.nome}</h4>
                     <span class="tag">Em Andamento</span>
                 </div>
-                <button class="btn-primary" onclick="verDetalhes(${o.id})">
+                <button class="btn-primary" data-action="detalhes" data-id="${o.id}">
                     <i class="fa-solid fa-eye"></i> Ver Detalhes
                 </button>
             </div>
@@ -213,6 +214,21 @@ function renderCheckboxesResp() {
         `).join('');
     }
 }
+    document.body.addEventListener('click', function(e){
+        const tela = e.target.closest('[data-screen]');
+        if (tela){
+            e.preventDefault();
+            showScreen(tela.dataset.screen);
+            return;
+        }
 
+        const alvo = e.target.closest('[data-action]');
+        if (!alvo) return;
+
+        if (alvo.dataset.action === 'nova-obra') openModal('modal-obra');
+        if (alvo.dataset.action === 'fechar') closeModal(alvo.dataset.modal);
+        if (alvo.dataset.action === 'detalhes') verDetalhes(Number(alvo.dataset.id));
+    });
 // INICIAR
 renderAll();
+})();

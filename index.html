@@ -19,13 +19,13 @@
             </div>
         </div>
         <nav class="menu">
-            <a href="#" class="menu-item active" onclick="showScreen('dashboard', this)">
+            <a href="#" class="menu-item active" data-screen="dashboard">
                 <i class="fa-solid fa-chart-pie"></i><span>Dashboard</span>
             </a>
-            <a href="#" class="menu-item" onclick="showScreen('obras', this)">
+            <a href="#" class="menu-item active" data-screen="obras">
                 <i class="fa-solid fa-helmet-safety"></i><span>Obras</span>
             </a>
-            <a href="#" class="menu-item" onclick="showScreen('responsaveis', this)">
+            <a href="#" class="menu-item active" data-screen="responsaveis">
                 <i class="fa-solid fa-users"></i><span>Responsáveis</span>
             </a>
         </nav>
@@ -43,7 +43,7 @@
         
         <header class="top-header">
             <h2 id="page-title">Painel de Controle</h2>
-            <button class="btn-primary" onclick="openModal('modal-obra')">
+            <button class="btn-primary" data-action="nova-obra">
                 <i class="fa-solid fa-plus"></i> Nova Obra
             </button>
         </header>
@@ -110,7 +110,8 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Nova Obra</h3>
-                <button class="btn-close" onclick="closeModal('modal-obra')">&times;</button>
+                <button class="btn-close" data-action="fechar" data-modal="modal-obra"> &times;
+                </button>
             </div>
             <form id="form-obra">
                 <div class="form-group">
@@ -133,7 +134,8 @@
         <div class="modal-content large">
             <div class="modal-header">
                 <h3 id="detalhes-titulo">Detalhes</h3>
-                <button class="btn-close" onclick="closeModal('modal-detalhes')">&times;</button>
+                <button class="btn-close" data-action="fechar" data-modal="modal-detalhes">&times;
+                </button>
             </div>
             <div id="detalhes-conteudo">
                 <!-- Conteúdo gerado via JS -->
