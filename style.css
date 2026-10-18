@@ -254,6 +254,14 @@ input:focus, select:focus { outline: none; border-color: var(--primary); }
     .project-header .btn-primary { width: 100%; justify-content: center; }
 }
 
+/* ===== RESPONSÁVEIS ===== */
+.resp-card { 
+    background:var(--bg-card); padding:12px; margin-bottom:8px; border-radius:8px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; 
+}
+.resp-cargo { 
+    font-size:0.85rem; color:var(--text-muted); 
+}
+
 .screen {
     display: none;
 }

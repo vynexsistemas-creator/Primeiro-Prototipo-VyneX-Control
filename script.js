@@ -2,8 +2,9 @@
 (function (){
     let db = {
     obras: JSON.parse(localStorage.getItem('vynex_obras')) || [],
-    responsaveis: JSON.parse(localStorage.getItem('vynex_resp')) || []
-};
+    responsaveis: JSON.parse(localStorage.getItem('vynex_resp')) || []};
+
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function salvar() {
     localStorage.setItem('vynex_obras', JSON.stringify(db.obras));
@@ -25,9 +26,10 @@ function showScreen(screenId) {
     document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     
+
     // Encontra o item clicado (seveve pelo onclick no HTML)
-    const clickedItem = document.querySelector(`[data-screen="${screenId}"]`);
-    if(clickedItem) clickedItem.classList.add('active');
+    document.querySelectorAll(`[data-screen="${screenId}"]`).forEach(item => item.classList.add('active'));
+    renderAll();
 }
 
 // MODAIS
@@ -55,7 +57,7 @@ document.getElementById('form-resp').addEventListener('submit', (e) => {
     
     if(!nome) return;
     
-    db.responsaveis.push({ id: Date.now(), nome, cargo });
+    db.responsaveis.push({ id: crypto.randomUUID(), nome, cargo });
     salvar();
     e.target.reset();
     showToast('Responsável cadastrado!');
@@ -65,7 +67,7 @@ document.getElementById('form-resp').addEventListener('submit', (e) => {
 document.getElementById('form-obra').addEventListener('submit', (e) => {
     e.preventDefault();
     const nome = document.getElementById('obra-nome').value;
-    const respIds = Array.from(document.querySelectorAll('#lista-resp-check input:checked')).map(i => parseInt(i.value));
+    const respIds = Array.from(document.querySelectorAll('#lista-resp-check input:checked')).map(i => i.value);
     
     if(!nome || respIds.length === 0) return showToast('Preencha nome e responsáveis');
     
@@ -76,7 +78,7 @@ document.getElementById('form-obra').addEventListener('submit', (e) => {
     ];
 
     db.obras.push({
-        id: Date.now(),
+        id: crypto.randomUUID(),
         nome,
         responsaveis: respIds,
         etapas,
@@ -97,26 +99,27 @@ function renderAll() {
     // Lista Responsaveis
     const listaResp = document.getElementById('lista-resp');
     listaResp.innerHTML = db.responsaveis.map(r => `
-        <div style="background:var(--bg-card); padding:12px; margin-bottom:8px; border-radius:8px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class ="resp-card">
             <div>
-                <strong>${r.nome}</strong>
-                <div style="font-size:0.85rem; color:var(--text-muted);">${r.cargo}</div>
+                <strong>${esc(r.nome)}</strong>
+                <div class="resp-cargo">${esc(r.cargo)}</div>
             </div>
         </div>
     `).join('');
 
     // Lista Obras (Dash e Full)
     const htmlObras = db.obras.map(o => {
-        const respNomes = o.responsaveis.map(id => {
-            const r = db.responsaveis.find(x => x.id === id);
-            return r ? r.nome : 'Desconhecido';
-        }).join(', ');
+        // Cria um Mapa rápido: ID -> Nome
+        const mapaResp = new Map(db.responsaveis.map(r => [r.id, r.nome]));
+        
+        // Pega os nomes direto do Mapa
+        const respNomes = o.responsaveis.map(id => mapaResp.get(id) || 'Desconhecido').join(', ');
 
         return `
         <div class="project-card">
             <div class="project-header">
                 <div class="project-title">
-                    <h4>${o.nome}</h4>
+                    <h4>${esc(o.nome)}</h4>
                     <span class="tag">Em Andamento</span>
                 </div>
                 <button class="btn-primary" data-action="detalhes" data-id="${o.id}">
@@ -136,8 +139,12 @@ function renderAll() {
         </div>`;
     }).join('');
 
-    document.getElementById('lista-obras-dash').innerHTML = htmlObras || '<p style="color:var(--text-muted); text-align:center; padding:20px;">Nenhuma obra cadastrada ainda.</p>';
-    document.getElementById('lista-obras-full').innerHTML = htmlObras || '<p style="color:var(--text-muted); text-align:center; padding:20px;">Nenhuma obra cadastrada ainda.</p>';
+    const telaAtiva = document.querySelector('.screen.active')?.id;
+    const vazio = '<p style="color:var(--text-muted); text-align:center; padding:20px;" >Nenhuma obra cadastrada ainda. </p>';
+    if (telaAtiva !== 'screen-obras')
+        document.getElementById('lista-obras-dash').innerHTML = htmlObras || vazio;
+    if (telaAtiva !== 'screen-dashboard')
+        document.getElementById('lista-obras-full').innerHTML = htmlObras || vazio;
 }
 
 // VER DETALHES (CHECKLIST & FOTOS)
@@ -163,7 +170,7 @@ function verDetalhes(id) {
                 <label for="foto-${etapa.id}" class="btn-link">
                     <i class="fa-solid fa-upload"></i> Anexar Foto
                 </label>
-                <input type="file" id="foto-${etapa.id}" accept="image/*" style="display:none" onchange="anexarFoto(${obra.id}, ${etapa.id}, this)">
+                <input type="file" id="foto-${etapa.id}" accept="image/*" style="display:none">
             </div>
         </div>`;
     }).join('');
@@ -177,23 +184,52 @@ function verDetalhes(id) {
     `;
 
     openModal('modal-detalhes');
+    
+    // Liga o evento de upload nos inputs de foto
+    container.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('change', function(){
+            const etapaId = Number(this.id.split('-')[1]);
+            anexarFoto(obra.id, etapaId, this);
+        });
+    });
 }
 
 // ANEXAR FOTO
+function comprimirImagem(dataUrl){
+    return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => {
+            const maxW = 800;
+            const escala = Math.min(1, maxW / img.width);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width * escala;
+            canvas.height = img.height * escala;
+            canvas.getContext('2d').drawImage(img, 0, 0,canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.7));
+        };
+        img.src = dataUrl;
+    });
+}
 function anexarFoto(obraId, etapaId, input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
             const obra = db.obras.find(o => o.id === obraId);
             const etapa = obra.etapas.find(e => e.id === etapaId);
-            etapa.foto = e.target.result;
+            etapa.foto = await comprimirImagem(e.target.result);
             
             // Recalcular progresso
             const total = obra.etapas.length;
             const completas = obra.etapas.filter(e => e.foto).length;
             obra.progresso = Math.round((completas / total) * 100);
             
-            salvar();
+            try {
+                salvar();
+            } catch (erro) {
+                showToast('Armazenamento Cheio! Remova fotos antigas');
+            }
+            
+           
             verDetalhes(obraId); // Atualiza o modal
             showToast('Foto anexada! Progresso atualizado.');
         };
@@ -209,7 +245,7 @@ function renderCheckboxesResp() {
     } else {
         container.innerHTML = db.responsaveis.map(r => `
             <label class="custom-check">
-                <input type="checkbox" value="${r.id}"> ${r.nome} (${r.cargo})
+                <input type="checkbox" value="${r.id}"> ${esc(r.nome)} (${esc(r.cargo)})
             </label>
         `).join('');
     }
@@ -227,7 +263,7 @@ function renderCheckboxesResp() {
 
         if (alvo.dataset.action === 'nova-obra') openModal('modal-obra');
         if (alvo.dataset.action === 'fechar') closeModal(alvo.dataset.modal);
-        if (alvo.dataset.action === 'detalhes') verDetalhes(Number(alvo.dataset.id));
+       if (alvo.dataset.action === 'detalhes') verDetalhes(alvo.dataset.id);
     });
 // INICIAR
 renderAll();
