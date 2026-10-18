@@ -223,6 +223,10 @@ input:focus, select:focus { outline: none; border-color: var(--primary); }
 .nav-item i { font-size: 1.4rem; margin-bottom: 4px; }
 .nav-item.active { color: var(--primary); }
 
+/* ===== FIXES MOBILE ===== */
+[data-action] i {
+    pointer-events: none;
+}
 /* ===== RESPONSIVIDADE ===== */
 @media (max-width: 768px) {
     /* Esconde Sidebar */
