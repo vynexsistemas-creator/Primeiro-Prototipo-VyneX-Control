@@ -2,15 +2,18 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>VyneX Control</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
     <!-- SIDEBAR -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <div class="brand">
             <img src="logo.png" alt="VyneX Logo" class="brand-logo">
             <div class="brand-text">
@@ -38,10 +41,16 @@
         </div>
     </aside>
 
+    <!-- OVERLAY MOBILE -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- MAIN CONTENT -->
     <main class="main-content">
         
         <header class="top-header">
+            <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
             <h2 id="page-title">Painel de Controle</h2>
             <button class="btn-primary" data-action="nova-obra">
                 <i class="fa-solid fa-plus"></i> Nova Obra
@@ -81,17 +90,15 @@
                 <form id="form-resp" class="form-grid">
                     <div class="form-group">
                         <label>Nome Completo</label>
-                        <input type="text" id="resp-nome" required>
+                        <input type="text" id="resp-nome" required autocomplete="name">
                     </div>
                     <div class="form-group">
                         <label>Cargo</label>
                         <select id="resp-cargo">
                             <option value="Engenheiro">Engenheiro</option>
                             <option value="Arquiteto">Arquiteto</option>
-                            <option value="Mestre de Obras">Mestre de Obras
-                            </option>
-                            <option value="Tec em Edificações">Tec em Edificações 
-                            </option>
+                            <option value="Mestre de Obras">Mestre de Obras</option>
+                            <option value="Tec em Edificações">Tec em Edificações</option>
                         </select>
                     </div>
                     <div class="form-group full-width">
@@ -110,8 +117,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Nova Obra</h3>
-                <button class="btn-close" data-action="fechar" data-modal="modal-obra"> &times;
-                </button>
+                <button class="btn-close" data-action="fechar" data-modal="modal-obra" aria-label="Fechar">&times;</button>
             </div>
             <form id="form-obra">
                 <div class="form-group">
@@ -119,7 +125,7 @@
                     <input type="text" id="obra-nome" required>
                 </div>
                 <div class="form-group">
-                    <label>Responsáveis (Segure Ctrl para selecionar mais de um)</label>
+                    <label>Responsáveis</label>
                     <div id="lista-resp-check" class="checkbox-list"></div>
                 </div>
                 <div class="form-group full-width">
@@ -129,34 +135,32 @@
         </div>
     </div>
 
-    <!-- MODAL: DETALHES DA OBRA (FOTOS E CHECKLIST) -->
+    <!-- MODAL: DETALHES DA OBRA -->
     <div id="modal-detalhes" class="modal-overlay">
         <div class="modal-content large">
             <div class="modal-header">
                 <h3 id="detalhes-titulo">Detalhes</h3>
-                <button class="btn-close" data-action="fechar" data-modal="modal-detalhes">&times;
-                </button>
+                <button class="btn-close" data-action="fechar" data-modal="modal-detalhes" aria-label="Fechar">&times;</button>
             </div>
-            <div id="detalhes-conteudo">
-                <!-- Conteúdo gerado via JS -->
-            </div>
+            <div id="detalhes-conteudo"></div>
         </div>
     </div>
+
     <!-- BOTTOM NAV (MOBILE) -->
-<nav class="bottom-nav">
-    <button class="nav-item active" data-screen="dashboard">
-        <i class="fa-solid fa-chart-pie"></i><span>Dashboard</span>
-    </button>
-    <button class="nav-item" data-screen="obras">
-        <i class="fa-solid fa-helmet-safety"></i><span>Obras</span>
-    </button>
-    <button class="nav-item" data-screen="responsaveis">
-        <i class="fa-solid fa-users"></i><span>Equipe</span>
-    </button>
-</nav>
+    <nav class="bottom-nav" style="padding-bottom: env(safe-area-inset-bottom);">
+        <button class="nav-item active" data-screen="dashboard">
+            <i class="fa-solid fa-chart-pie"></i><span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-screen="obras">
+            <i class="fa-solid fa-helmet-safety"></i><span>Obras</span>
+        </button>
+        <button class="nav-item" data-screen="responsaveis">
+            <i class="fa-solid fa-users"></i><span>Equipe</span>
+        </button>
+    </nav>
 
     <div id="toast" class="toast"></div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=3"></script>
 </body>
 </html>
