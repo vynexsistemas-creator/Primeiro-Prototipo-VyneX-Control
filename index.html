@@ -112,7 +112,7 @@
 
     </main>
 
-    <!-- MODAL: NOVA OBRA -->
+  <!-- MODAL: NOVA OBRA -->
     <div id="modal-obra" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -120,14 +120,21 @@
                 <button class="btn-close" data-action="fechar" data-modal="modal-obra" aria-label="Fechar">&times;</button>
             </div>
             <form id="form-obra">
+                <!-- NOVO CAMPO: TIPO DE OBRA -->
+                <div class="form-group">
+                    <small style="color:var(--text-muted); font-size:0.8rem; margin-top:4px;">O checklist será gerado automaticamente.</small>
+                </div>
+
                 <div class="form-group">
                     <label>Nome da Obra</label>
-                    <input type="text" id="obra-nome" required>
+                    <input type="text" id="obra-nome" required placeholder="Ex: Casa do João">
                 </div>
+                
                 <div class="form-group">
                     <label>Responsáveis</label>
                     <div id="lista-resp-check" class="checkbox-list"></div>
                 </div>
+                
                 <div class="form-group full-width">
                     <button type="submit" class="btn-primary">Criar Obra</button>
                 </div>
@@ -143,6 +150,44 @@
                 <button class="btn-close" data-action="fechar" data-modal="modal-detalhes" aria-label="Fechar">&times;</button>
             </div>
             <div id="detalhes-conteudo"></div>
+        </div>
+    </div>
+        <!-- MODAL: EDITAR OBRA -->
+    <div id="modal-editar" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Obra</h3>
+                <button class="btn-close" data-action="fechar" data-modal="modal-editar" aria-label="Fechar">&times;</button>
+            </div>
+            <form id="form-editar-obra">
+                <div class="form-group">
+                    <label>Nome da Obra</label>
+                    <input type="text" id="obra-nome-edit" required>
+                </div>
+                <div class="form-group">
+                    <label>Responsáveis</label>
+                    <div id="lista-resp-check-edit" class="checkbox-list"></div>
+                </div>
+                <div class="form-group full-width">
+                    <button type="submit" class="btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- MODAL: CONFIRMAR EXCLUSÃO -->
+    <div id="modal-confirmar" class="modal-overlay">
+        <div class="modal-content" style="max-width:420px;">
+            <div class="modal-header">
+                <h3>Confirmar exclusão</h3>
+                <button class="btn-close" data-action="fechar" data-modal="modal-confirmar" aria-label="Fechar">&times;</button>
+            </div>
+            <p id="confirmar-texto" style="color:var(--text-muted); margin-bottom:20px; line-height:1.5;"></p>
+            <div class="confirm-actions">
+                <button class="btn-delete-full" data-action="confirmar-exclusao">
+                    <i class="fa-solid fa-trash"></i> Excluir
+                </button>
+                <button class="btn-cancelar" data-action="fechar" data-modal="modal-confirmar">Cancelar</button>
+            </div>
         </div>
     </div>
 

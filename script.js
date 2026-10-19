@@ -142,25 +142,44 @@
         });
     }
 
-    // CADASTRO DE OBRA
+    // ===== CHECKLIST PADRÃO PARA TODAS AS OBRAS =====
+    const checklistPadrao = [
+        { id: 1,  nome: 'Limpeza e Preparação do Terreno' },
+        { id: 2,  nome: 'Marcação e Abertura de Valas' },
+        { id: 3,  nome: 'Fundação e Isolamento' },
+        { id: 4,  nome: 'Levantamento da Alvenaria' },
+        { id: 5,  nome: 'Chapisco e Reboco' },
+        { id: 6,  nome: 'Instalação Elétrica (Cabeamento)' },
+        { id: 7,  nome: 'Instalação Hidrossanitária' },
+        { id: 8,  nome: 'Piso e Revestimento' },
+        { id: 9,  nome: 'Esquadrias (Portas e Janelas)' },
+        { id: 10, nome: 'Pintura e Acabamento' },
+        { id: 11, nome: 'Instalação de Louças e Metais' },
+        { id: 12, nome: 'Limpeza Final e Entrega' }
+    ];
+
+    // CADASTRO DE OBRA (Checklist padrão automático)
     const formObra = document.getElementById('form-obra');
     if (formObra) {
         formObra.addEventListener('submit', function (e) {
             e.preventDefault();
+
             const nome = document.getElementById('obra-nome').value.trim();
             const respIds = Array.from(
                 document.querySelectorAll('#lista-resp-check input:checked')
             ).map(i => i.value);
 
             if (!nome || respIds.length === 0) {
-                return showToast('Preencha nome e responsáveis');
+                return showToast('Preencha o nome e os responsáveis!');
             }
 
-            const etapas = [
-                { id: 1, nome: 'Fundação', foto: null },
-                { id: 2, nome: 'Alvenaria', foto: null },
-                { id: 3, nome: 'Elétrica', foto: null }
-            ];
+            // Gera as etapas a partir do checklist padrão
+            const etapas = checklistPadrao.map(etapa => ({
+                id: etapa.id,
+                nome: etapa.nome,
+                foto: null,
+                pulada: false   // marca se a etapa foi "pular/não se aplica"
+            }));
 
             db.obras.push({
                 id: gerarId(),
@@ -169,10 +188,11 @@
                 etapas,
                 progresso: 0
             });
+
             salvar();
             e.target.reset();
             closeModal('modal-obra');
-            showToast('Obra criada com sucesso!');
+            showToast('Obra criada com checklist padrão!');
         });
     }
 
@@ -203,7 +223,7 @@
         // Mapa rápido de responsáveis
         const mapaResp = new Map(db.responsaveis.map(r => [r.id, r.nome]));
 
-        // Lista Obras
+         // Lista Obras
         const htmlObras = db.obras.map(o => {
             const respNomes = o.responsaveis
                 .map(id => mapaResp.get(id) || 'Desconhecido')
@@ -216,9 +236,6 @@
                         <h4>${esc(o.nome)}</h4>
                         <span class="tag">Em Andamento</span>
                     </div>
-                    <button class="btn-primary" data-action="detalhes" data-id="${o.id}">
-                        <i class="fa-solid fa-eye"></i> Ver Detalhes
-                    </button>
                 </div>
                 <div style="font-size:0.9rem; color:var(--text-muted);">
                     <i class="fa-solid fa-users"></i> ${esc(respNomes)}
@@ -230,8 +247,20 @@
                     <span>Progresso</span>
                     <strong style="color:var(--primary)">${o.progresso}%</strong>
                 </div>
+                <div class="project-actions">
+                    <button class="btn-primary btn-sm" data-action="detalhes" data-id="${o.id}">
+                        <i class="fa-solid fa-eye"></i> Ver
+                    </button>
+                    <button class="btn-edit" data-action="editar" data-id="${o.id}" aria-label="Editar obra">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="btn-delete" data-action="excluir" data-id="${o.id}" aria-label="Excluir obra">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
             </div>`;
         }).join('');
+    
 
         const vazio = '<p style="color:var(--text-muted); text-align:center; padding:20px;">Nenhuma obra cadastrada ainda.</p>';
         const dash = document.getElementById('lista-obras-dash');
@@ -251,7 +280,26 @@
         const container = document.getElementById('detalhes-conteudo');
         if (!container) return;
 
-        const htmlEtapas = obra.etapas.map(etapa => {
+                const htmlEtapas = obra.etapas.map(etapa => {
+
+            // Etapa marcada como "não se aplica"
+            if (etapa.pulada) {
+                return `
+                <div class="stage-card stage-pulada">
+                    <div class="stage-header">${esc(etapa.nome)}</div>
+                    <div class="stage-placeholder">
+                        <i class="fa-solid fa-ban"></i>
+                    </div>
+                    <div class="stage-footer">
+                        <span>Não se aplica</span>
+                        <button class="btn-link" data-action="restaurar-etapa"
+                            data-obra="${obra.id}" data-etapa="${etapa.id}">
+                            <i class="fa-solid fa-rotate-left"></i> Restaurar
+                        </button>
+                    </div>
+                </div>`;
+            }
+
             const imgTag = etapa.foto
                 ? `<img src="${etapa.foto}" alt="Foto ${esc(etapa.nome)}">`
                 : '<i class="fa-solid fa-camera"></i>';
@@ -266,9 +314,15 @@
                 ${mediaHtml}
                 <div class="stage-footer">
                     <span>${etapa.foto ? 'Concluído' : 'Pendente'}</span>
-                    <label for="foto-${etapa.id}" class="btn-link">
-                        <i class="fa-solid fa-upload"></i> Anexar Foto
-                    </label>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <label for="foto-${etapa.id}" class="btn-link">
+                            <i class="fa-solid fa-upload"></i> Foto
+                        </label>
+                        <button class="btn-link btn-skip" data-action="pular-etapa"
+                            data-obra="${obra.id}" data-etapa="${etapa.id}">
+                            <i class="fa-solid fa-ban"></i> Pular
+                        </button>
+                    </div>
                     <input type="file" id="foto-${etapa.id}" accept="image/*" capture="environment" style="display:none">
                 </div>
             </div>`;
@@ -324,9 +378,11 @@
                 etapa.foto = await comprimirImagem(e.target.result);
 
                 // Recalcular progresso
-                const total = obra.etapas.length;
-                const completas = obra.etapas.filter(et => et.foto).length;
-                obra.progresso = Math.round((completas / total) * 100);
+               // Etapas que realmente valem para essa obra (ignora as puladas)
+                const validas = obra.etapas.filter(et => !et.pulada);
+                const total = validas.length;
+                const completas = validas.filter(et => et.foto).length;
+                obra.progresso = total === 0 ? 100 : Math.round((completas / total) * 100);
 
                 salvar();
                 verDetalhes(obraId);
@@ -353,6 +409,83 @@
         }
     }
 
+        // EDITAR OBRA
+    let obraEditandoId = null;
+
+    function abrirModalEditar(obraId) {
+        const obra = db.obras.find(o => o.id === obraId);
+        if (!obra) return;
+
+        const inputNome = document.getElementById('obra-nome-edit');
+        if (inputNome) inputNome.value = obra.nome;
+
+        const containerCheck = document.getElementById('lista-resp-check-edit');
+        if (containerCheck) {
+            if (db.responsaveis.length === 0) {
+                containerCheck.innerHTML = '<p style="color:var(--text-muted); padding:10px;">Nenhum responsável cadastrado.</p>';
+            } else {
+                containerCheck.innerHTML = db.responsaveis.map(r => `
+                    <label class="custom-check">
+                        <input type="checkbox" value="${r.id}" ${obra.responsaveis.includes(r.id) ? 'checked' : ''}>
+                        ${esc(r.nome)} (${esc(r.cargo)})
+                    </label>
+                `).join('');
+            }
+        }
+
+        obraEditandoId = obraId;
+        openModal('modal-editar');
+    }
+
+    const formEditar = document.getElementById('form-editar-obra');
+    if (formEditar) {
+        formEditar.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (!obraEditandoId) return;
+
+            const obra = db.obras.find(o => o.id === obraEditandoId);
+            if (!obra) return;
+
+            const novoNome = document.getElementById('obra-nome-edit').value.trim();
+            if (!novoNome) return showToast('Informe o nome da obra!');
+
+            const novosResp = Array.from(
+                document.querySelectorAll('#lista-resp-check-edit input:checked')
+            ).map(i => i.value);
+
+            if (novosResp.length === 0) return showToast('Selecione pelo menos um responsável!');
+
+            obra.nome = novoNome;
+            obra.responsaveis = novosResp;
+
+            salvar();
+            closeModal('modal-editar');
+            obraEditandoId = null;
+            showToast('Obra atualizada com sucesso!');
+        });
+    }
+
+    // EXCLUIR OBRA (com modal de confirmação)
+    let obraExcluindoId = null;
+
+    function pedirExclusao(obraId) {
+        const obra = db.obras.find(o => o.id === obraId);
+        if (!obra) return;
+
+        obraExcluindoId = obra.id;
+        const txt = document.getElementById('confirmar-texto');
+        if (txt) txt.innerText = `Tem certeza que deseja excluir "${obra.nome}"? Essa ação não pode ser desfeita.`;
+        openModal('modal-confirmar');
+    }
+
+    function confirmarExclusao() {
+        if (!obraExcluindoId) return;
+        db.obras = db.obras.filter(o => o.id !== obraExcluindoId);
+        obraExcluindoId = null;
+        closeModal('modal-confirmar');
+        salvar();
+        showToast('Obra excluída!');
+    }
     // EVENT LISTENER GLOBAL (delegação de eventos)
     document.body.addEventListener('click', function (e) {
 
@@ -382,9 +515,34 @@
 
         const acao = alvo.dataset.action;
 
+        if (acao === 'editar') abrirModalEditar(alvo.dataset.id);
+        if (acao === 'excluir') pedirExclusao(alvo.dataset.id);
+        if (acao === 'confirmar-exclusao') confirmarExclusao();
         if (acao === 'nova-obra') openModal('modal-obra');
         if (acao === 'fechar') closeModal(alvo.dataset.modal);
         if (acao === 'detalhes') verDetalhes(alvo.dataset.id);
+                if (acao === 'pular-etapa') {
+            const obra = db.obras.find(o => o.id === alvo.dataset.obra);
+            const etapa = obra?.etapas.find(e => e.id === Number(alvo.dataset.etapa));
+            if (etapa) {
+                etapa.pulada = true;
+                etapa.foto = null;          // limpa a foto, pois a etapa saiu do cálculo
+                salvar();
+                verDetalhes(obra.id);
+                showToast('Etapa marcada como não aplicada.');
+            }
+        }
+
+        if (acao === 'restaurar-etapa') {
+            const obra = db.obras.find(o => o.id === alvo.dataset.obra);
+            const etapa = obra?.etapas.find(e => e.id === Number(alvo.dataset.etapa));
+            if (etapa) {
+                etapa.pulada = false;
+                salvar();
+                verDetalhes(obra.id);
+                showToast('Etapa restaurada.');
+            }
+        }
     });
 
     // Fechar modal clicando fora dele
